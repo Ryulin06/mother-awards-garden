@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#fff7f3" />
+  <title>60位媽媽・60朵花｜模範母親祝福花園</title>
+  <style>
+    :root{
+      --bg:#fffaf6; --panel:#ffffff; --text:#493b36; --muted:#8b7770;
+      --line:#eaded8; --soft:#f8ece7; --soft2:#f4ddd4; --accent:#c88774;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:system-ui,-apple-system,"Noto Sans TC","PingFang TC",sans-serif;background:var(--bg);color:var(--text)}
+    button,input,textarea,select{font:inherit}
+    button{touch-action:manipulation}
+    .wrap{max-width:1120px;margin:auto;padding:24px}
+    .hero{background:linear-gradient(135deg,#fff8f4,#f7ece6);border:1px solid var(--line);border-radius:28px;padding:28px}
+    .hero h1{margin:.2rem 0;font-size:clamp(30px,5vw,52px)}
+    .hero p{color:var(--muted);margin:.5rem 0 0;line-height:1.8}
+    .tabs{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+    .btn{border:1px solid var(--line);background:white;border-radius:14px;padding:12px 16px;cursor:pointer;min-height:46px}
+    .btn.primary{background:var(--soft2);border-color:#e8c5b8}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+    .controls input,.controls select{border:1px solid var(--line);border-radius:12px;padding:12px;background:white;min-height:46px}
+    .controls input{min-width:240px;flex:1}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .card{border:1px solid var(--line);background:white;border-radius:18px;padding:15px;cursor:pointer;text-align:left}
+    .card.lit{background:#fff7f3;border-color:#e8c7bb}
+    .row{display:flex;gap:12px;align-items:center}
+    .flower{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:#f3e5df;font-size:28px;flex:0 0 auto}
+    .name{font-weight:700}
+    .meta{color:var(--muted);font-size:14px;margin-top:3px}
+    .tag{display:inline-block;font-size:12px;background:#f5efec;border:1px solid var(--line);padding:3px 7px;border-radius:999px;margin:6px 4px 0 0}
+    .detail,.screen{margin-top:16px;border:1px solid var(--line);background:white;border-radius:24px;padding:22px}
+    .hidden{display:none}
+    .detail textarea{width:100%;min-height:100px;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px}
+    .status{font-size:13px;color:var(--muted)}
+    .progress{height:9px;background:#eee6e2;border-radius:999px;overflow:hidden;margin-top:14px}
+    .progress>div{height:100%;background:var(--accent);width:0;transition:width .25s ease}
+    .screen-layout{display:grid;grid-template-columns:1fr 1.4fr;gap:18px}
+    .screen-focus{border:1px solid var(--line);border-radius:22px;padding:28px;text-align:center;background:#fffdfb;display:flex;flex-direction:column;justify-content:center}
+    .screen-flower{font-size:88px}
+    .garden{display:grid;grid-template-columns:repeat(10,1fr);gap:7px}
+    .dot{aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:#f1e4df;border:1px solid var(--line);font-size:15px}
+    .dot.lit{background:#f2d8cf}
+    .pager{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:10px}
+    .notice{margin-top:16px;padding:12px 14px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);font-size:14px}
+    .footer{color:var(--muted);font-size:12px;text-align:center;padding:28px 0 8px}
+    @media(max-width:760px){
+      .grid{grid-template-columns:1fr 1fr}
+      .screen-layout{grid-template-columns:1fr}
+      .garden{grid-template-columns:repeat(6,1fr)}
+      .wrap{padding:16px}
+    }
+    @media(max-width:480px){
+      .grid{grid-template-columns:1fr}
+      .hero{padding:20px}
+      .controls input,.controls select{width:100%;min-width:0}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <div class="status">模範母親表揚典禮｜即時祝福互動</div>
+      <h1>60位媽媽・60朵花</h1>
+      <p>點選獲獎者閱讀事蹟、留下一句祝福；送出後，現場大螢幕會即時同步綻放。</p>
+      <div class="progress"><div id="progressBar"></div></div>
+      <div class="status" id="countLabel">載入中…</div>
+    </section>
+
+    <div class="tabs" aria-label="模式切換">
+      <button class="btn primary" id="mobileTab" type="button">手機互動模式</button>
+      <button class="btn" id="screenTab" type="button">大螢幕模式</button>
+    </div>
+
+    <section id="mobileView">
+      <div class="controls">
+        <input id="search" type="search" placeholder="搜尋姓名、關鍵字" aria-label="搜尋獲獎者" />
+        <select id="filter" aria-label="篩選狀態">
+          <option value="all">全部</option>
+          <option value="lit">已收到祝福</option>
+          <option value="unlit">尚未收到祝福</option>
+        </select>
+      </div>
+
+      <div id="grid" class="grid"></div>
+
+      <div class="pager">
+        <button class="btn" id="prev" type="button">上一頁</button>
+        <span id="pageInfo" class="status"></span>
+        <button class="btn" id="next" type="button">下一頁</button>
+      </div>
+
+      <section id="detail" class="detail hidden" aria-live="polite"></section>
+    </section>
+
+    <section id="screenView" class="screen hidden">
+      <div class="screen-layout">
+        <div class="screen-focus">
+          <div class="status">正在播放</div>
+          <div id="screenFlower" class="screen-flower">🌷</div>
+          <h2 id="screenName">載入中</h2>
+          <div id="screenRole" class="meta"></div>
+          <p id="screenQuote"></p>
+          <div id="screenWish" class="notice">等待祝福</div>
+        </div>
+
+        <div>
+          <h3>現場即時花園</h3>
+          <div id="garden" class="garden"></div>
+          <div class="tabs">
+            <button class="btn" id="screenPrev" type="button">上一位</button>
+            <button class="btn" id="screenNext" type="button">下一位</button>
+            <button class="btn primary" id="autoBtn" type="button">開始自動輪播</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="systemMsg" class="notice">正在連線 Supabase…</div>
+    <div class="footer">模範母親表揚典禮｜祝福花園</div>
+  </main>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from './config.js';
+
+const state={awards:[],wishes:[],page:1,pageSize:12,screenIndex:0,timer:null};
+const $=s=>document.querySelector(s);
+const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+
+async function loadAll(){
+  const [{data:awards,error:aErr},{data:wishes,error:wErr}]=await Promise.all([
+    supabase.from('awards').select('*').order('sort_order'),
+    supabase.from('wishes').select('*').order('created_at',{ascending:false})
+  ]);
+  if(aErr||wErr){
+    $('#systemMsg').textContent='資料載入失敗：'+(aErr?.message||wErr?.message);
+    return;
+  }
+  state.awards=awards||[];
+  state.wishes=wishes||[];
+  renderAll();
+}
+
+const latestWish=id=>state.wishes.find(w=>w.award_id===id)||null;
+const litIds=()=>new Set(state.wishes.map(w=>w.award_id));
+
+function escapeHtml(s=''){
+  return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function updateProgress(){
+  const total=state.awards.length||60,n=litIds().size;
+  $('#countLabel').textContent=`目前 ${n} / ${total} 位已收到祝福`;
+  $('#progressBar').style.width=`${Math.min(100,Math.round(n/total*100))}%`;
+}
+
+function getFiltered(){
+  const q=$('#search').value.trim().toLowerCase(),f=$('#filter').value,lit=litIds();
+  return state.awards.filter(a=>{
+    const hay=[a.name,a.role,a.story,(a.keywords||[]).join(' ')].join(' ').toLowerCase();
+    return(!q||hay.includes(q))&&(f==='all'||(f==='lit'&&lit.has(a.id))||(f==='unlit'&&!lit.has(a.id)));
+  });
+}
+
+function renderCards(){
+  const list=getFiltered(),pages=Math.max(1,Math.ceil(list.length/state.pageSize));
+  state.page=Math.min(state.page,pages);
+  const slice=list.slice((state.page-1)*state.pageSize,state.page*state.pageSize),lit=litIds();
+
+  $('#grid').innerHTML='';
+  slice.forEach(a=>{
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='card'+(lit.has(a.id)?' lit':'');
+    b.innerHTML=`<div class="row">
+      <div class="flower">${lit.has(a.id)?'🌺':'🌷'}</div>
+      <div>
+        <div class="name">${String(a.sort_order).padStart(2,'0')}. ${escapeHtml(a.name)}</div>
+        <div class="meta">${escapeHtml(a.role||'')}</div>
+        ${(a.keywords||[]).map(k=>`<span class="tag">${escapeHtml(k)}</span>`).join('')}
+      </div>
+    </div>`;
+    b.addEventListener('click',()=>openAward(a.id));
+    $('#grid').appendChild(b);
+  });
+
+  $('#pageInfo').textContent=`第 ${state.page} / ${pages} 頁・共 ${list.length} 位`;
+  $('#prev').disabled=state.page<=1;
+  $('#next').disabled=state.page>=pages;
+}
+
+function openAward(id){
+  const a=state.awards.find(x=>x.id===id),w=latestWish(id);
+  if(!a)return;
+
+  const d=$('#detail');
+  d.classList.remove('hidden');
+  d.innerHTML=`
+    <button class="btn" id="closeDetail" type="button">收起</button>
+    <h2>${escapeHtml(a.name)}</h2>
+    <div class="meta">${escapeHtml(a.role||'')}</div>
+    <p>${escapeHtml(a.story||'')}</p>
+    <div class="notice">「${escapeHtml(a.quote||'')}」</div>
+    <form id="wishForm">
+      <label for="wishText"><strong>留下一句祝福</strong></label>
+      <textarea id="wishText" maxlength="40" placeholder="例如：媽媽辛苦了，祝您平安健康。"></textarea>
+      <div class="tabs">
+        <button class="btn primary" type="submit">送出祝福・讓花綻放</button>
+      </div>
+    </form>
+    ${w?`<div class="notice">最新祝福：${escapeHtml(w.message)}</div>`:''}
+  `;
+
+  $('#closeDetail').addEventListener('click',()=>d.classList.add('hidden'));
+  $('#wishForm').addEventListener('submit',async e=>{
+    e.preventDefault();
+    const message=$('#wishText').value.trim().slice(0,40);
+    if(!message){ alert('請先輸入祝福'); return; }
+
+    const submitBtn=e.currentTarget.querySelector('button[type="submit"]');
+    submitBtn.disabled=true;
+    submitBtn.textContent='送出中…';
+
+    const {error}=await supabase.from('wishes').insert({award_id:id,message});
+
+    submitBtn.disabled=false;
+    submitBtn.textContent='送出祝福・讓花綻放';
+
+    if(error){ alert('送出失敗：'+error.message); return; }
+    $('#wishText').value='';
+    $('#systemMsg').textContent='祝福已送出，等待即時同步。';
+  });
+
+  d.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderGarden(){
+  const lit=litIds();
+  $('#garden').innerHTML='';
+  state.awards.forEach(a=>{
+    const d=document.createElement('div');
+    d.className='dot'+(lit.has(a.id)?' lit':'');
+    d.textContent=lit.has(a.id)?'🌺':'·';
+    d.title=a.name;
+    $('#garden').appendChild(d);
+  });
+}
+
+function showScreen(i){
+  if(!state.awards.length)return;
+  state.screenIndex=(i+state.awards.length)%state.awards.length;
+  const a=state.awards[state.screenIndex],w=latestWish(a.id);
+  $('#screenFlower').textContent=w?'🌺':'🌷';
+  $('#screenName').textContent=a.name;
+  $('#screenRole').textContent=a.role||'';
+  $('#screenQuote').textContent='「'+(a.quote||'')+'」';
+  $('#screenWish').textContent=w?('最新祝福：'+w.message):'等待現場祝福';
+}
+
+function renderAll(){
+  updateProgress();
+  renderCards();
+  renderGarden();
+  showScreen(state.screenIndex);
+}
+
+$('#search').addEventListener('input',()=>{state.page=1;renderCards()});
+$('#filter').addEventListener('change',()=>{state.page=1;renderCards()});
+$('#prev').addEventListener('click',()=>{if(state.page>1){state.page--;renderCards()}});
+$('#next').addEventListener('click',()=>{state.page++;renderCards()});
+
+$('#mobileTab').addEventListener('click',()=>{
+  $('#mobileView').classList.remove('hidden');
+  $('#screenView').classList.add('hidden');
+});
+
+$('#screenTab').addEventListener('click',()=>{
+  $('#mobileView').classList.add('hidden');
+  $('#screenView').classList.remove('hidden');
+  renderAll();
+});
+
+$('#screenPrev').addEventListener('click',()=>showScreen(state.screenIndex-1));
+$('#screenNext').addEventListener('click',()=>showScreen(state.screenIndex+1));
+
+$('#autoBtn').addEventListener('click',()=>{
+  if(state.timer){
+    clearInterval(state.timer);
+    state.timer=null;
+    $('#autoBtn').textContent='開始自動輪播';
+  }else{
+    state.timer=setInterval(()=>showScreen(state.screenIndex+1),5000);
+    $('#autoBtn').textContent='停止自動輪播';
+  }
+});
+
+await loadAll();
+
+supabase.channel('mother-wishes-live')
+  .on('postgres_changes',{event:'INSERT',schema:'public',table:'wishes'},payload=>{
+    state.wishes.unshift(payload.new);
+    renderAll();
+    $('#systemMsg').textContent='收到新的現場祝福，畫面已同步。';
+  })
+  .subscribe(status=>{
+    if(status==='SUBSCRIBED') $('#systemMsg').textContent='即時同步已啟用。';
+  });
+</script>
+</body>
+</html>
